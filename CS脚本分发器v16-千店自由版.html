@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CS脚本分发器 v16.1 · 千店自由版</title>
+<style>
+
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;background:#f5f5f5;color:#1a1a1a;}
+header{background:#1a1a2e;color:#fff;padding:18px 32px;}
+header h1{font-size:19px;font-weight:700;margin-bottom:3px;}
+header p{font-size:12px;color:#888;}
+
+.filters{background:#fff;padding:12px 32px;border-bottom:1px solid #eee;display:flex;gap:14px;flex-wrap:wrap;align-items:center;}
+.filter-group{display:flex;align-items:center;gap:7px;}
+.filter-group label{font-size:11px;color:#666;font-weight:600;white-space:nowrap;}
+.filter-group select{padding:4px 9px;border:1px solid #ddd;border-radius:5px;font-size:11px;min-width:100px;background:#fff;cursor:pointer;}
+.stats{margin-left:auto;font-size:11px;color:#888;}
+.stats strong{color:#D8000F;}
+.stats .green{color:#2e7d32;}
+.container{max-width:1200px;margin:0 auto;padding:16px 32px;}
+.section-label{font-size:11px;color:#888;margin:16px 0 10px;padding-left:4px;border-left:3px solid #D8000F;font-weight:700;display:flex;align-items:center;gap:7px;}
+.badge-count{background:#D8000F;color:#fff;border-radius:10px;padding:1px 6px;font-size:10px;}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(350px,1fr));gap:12px;}
+.card{background:#fff;border-radius:10px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.06);transition:box-shadow .2s,transform .2s;border:1px solid #eee;position:relative;}
+.card:hover{box-shadow:0 4px 14px rgba(0,0,0,.1);transform:translateY(-1px);}
+.card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:7px;gap:7px;}
+.card-title{font-size:12px;font-weight:700;color:#1a1a2e;line-height:1.5;flex:1;}
+.badge{font-size:10px;padding:2px 6px;border-radius:4px;font-weight:600;white-space:nowrap;flex-shrink:0;}
+.badge-north{background:#e3f2fd;color:#1565c0;}
+.badge-south{background:#e8f5e9;color:#2e7d32;}
+.badge-central{background:#fff3e0;color:#e65100;}
+.badge-hq{background:#f3e5f5;color:#7b1fa2;}
+.badge-style{font-size:9px;padding:1px 5px;border-radius:3px;background:#f0f0f0;color:#666;margin-left:4px;}
+.card-meta{font-size:10px;color:#888;margin-bottom:7px;}
+.card-meta strong{color:#333;}
+.card-meta span{margin-right:10px;}
+.card-desc{font-size:10px;color:#888;background:#f8f8f8;border-radius:5px;padding:6px 8px;margin-bottom:8px;border-left:3px solid #D8000F;line-height:1.5;}
+.card-content{font-size:11px;color:#444;line-height:1.75;max-height:130px;overflow:hidden;position:relative;transition:max-height .3s ease;}
+.card-content::after{content:"";position:absolute;bottom:0;left:0;right:0;height:40px;background:linear-gradient(transparent,#fff);pointer-events:none;}
+.card-content.expanded{max-height:9999px;overflow:visible;}
+.card-content.expanded::after{display:none;}
+.card-actions{display:flex;align-items:center;gap:7px;margin-top:7px;}
+.expand-btn{display:inline-block;font-size:10px;color:#1a1a2e;cursor:pointer;user-select:none;font-weight:600;padding:3px 0;pointer-events:auto;}
+.expand-btn:hover{color:#D8000F;}
+.copy-btn{margin-left:auto;background:#1a1a2e;color:#fff;border:none;padding:4px 12px;border-radius:5px;font-size:10px;font-weight:600;cursor:pointer;transition:background .2s;flex-shrink:0;pointer-events:auto;}
+.copy-btn:hover{background:#D8000F;}
+.copy-btn.copied{background:#2e7d32;}
+.no-result{text-align:center;padding:50px 0;color:#bbb;font-size:14px;display:none;}
+.no-result::before{content:"📭";display:block;font-size:36px;margin-bottom:10px;}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:#fff;padding:10px 20px;border-radius:8px;font-size:12px;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;}
+.toast.show{opacity:1;}
+footer{text-align:center;padding:18px;font-size:11px;color:#bbb;margin-top:16px;}
+
+.input-zone{padding:16px 32px;border-bottom:1px solid #eee;background:#fafafa;display:flex;flex-direction:column;gap:10px;}.input-zone .label{font-size:12px;color:#666;font-weight:600;}.input-zone textarea{width:100%;box-sizing:border-box;padding:10px 12px;font-size:13px;border:1px solid #ddd;border-radius:6px;resize:vertical;min-height:72px;font-family:inherit;line-height:1.6;}.input-zone textarea:focus{border-color:#D8000F;outline:none;}.input-zone .hint{font-size:11px;color:#999;line-height:1.5;}.gen-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}.gen-row .desc{font-size:12px;color:#666;flex:1;}.batch-btn{background:#D8000F;color:#fff;border:none;padding:9px 28px;border-radius:5px;font-size:14px;cursor:pointer;white-space:nowrap;font-weight:700;}.batch-btn:hover{background:#b3000c;}.batch-btn:disabled{background:#ccc;cursor:not-allowed;}.pause-btn{background:#ff9800;color:#fff;border:none;padding:9px 20px;border-radius:5px;font-size:13px;cursor:pointer;white-space:nowrap;font-weight:600;}.pause-btn:hover{background:#f57c00;}.pause-btn:disabled{background:#ccc;cursor:not-allowed;}.save-btn{background:#1a1a2e;color:#fff;border:none;padding:9px 20px;border-radius:5px;font-size:13px;cursor:pointer;}.save-btn:hover{background:#2a2a4e;}.save-btn.saved{background:#52c41a;}#genProgress{display:none;background:#fffde7;border-bottom:1px solid #ffe58f;padding:10px 32px;font-size:12px;color:#8a6d3b;}#genProgress .bar-wrap{background:#eee;height:6px;border-radius:3px;margin-top:6px;overflow:hidden;}#genProgress .bar{height:100%;background:#D8000F;width:0%;transition:width .3s;border-radius:3px;}#pwModalOverlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:9999;justify-content:center;align-items:center;}#pwModalOverlay.show{display:flex;}.modal-box{background:#fff;border-radius:12px;padding:32px;min-width:340px;max-width:420px;box-shadow:0 8px 32px rgba(0,0,0,0.15);}.modal-box h3{font-size:16px;font-weight:700;margin-bottom:8px;color:#1a1a2e;}.modal-tip{font-size:12px;color:#888;margin-bottom:16px;line-height:1.5;}.modal-input{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:6px;font-size:14px;margin-bottom:12px;box-sizing:border-box;}.modal-input:focus{border-color:#D8000F;outline:none;}.modal-error{color:#D8000F;font-size:12px;margin-bottom:12px;min-height:18px;}.modal-btns{display:flex;gap:10px;justify-content:flex-end;}.modal-btn{padding:8px 20px;border-radius:6px;font-size:13px;cursor:pointer;border:none;font-weight:600;}.modal-btn-cancel{background:#f5f5f5;color:#666;}.modal-btn-cancel:hover{background:#e8e8e8;}.modal-btn-ok{background:#D8000F;color:#fff;}.modal-btn-ok:hover{background:#b3000c;}.pw-row{display:flex;align-items:center;gap:8px;}.pw-label{font-size:11px;color:#888;}.pw-btn{background:none;border:1px solid #ddd;padding:4px 10px;border-radius:4px;font-size:11px;cursor:pointer;color:#666;}.pw-btn:hover{border-color:#D8000F;color:#D8000F;}
+</style>
+</head>
+<body>
+
+<header><h1>CS脚本分发器 v16.1 · 千店自由版</h1><p>短视频矩阵分析 · 34条脚本 · 千店里程碑 · 9种风格 · 密码保护</p></header>
+
+<div class="input-zone">
+ <div class="label">主线/角度（必填）：输入核心主题，AI以此为主线生成34条差异化脚本</div>
+
+ <textarea id="topicInput" placeholder="例如：千店里程碑；规模翻倍；1年从500到1000家……">千店里程碑 · 1年规模翻倍，联想百应服务中心突破1000家</textarea>
+
+ <div class="hint">输入利益点/痛点/角度，AI生成34条风格各异的个性化脚本（快讯型/故事型/数据型/悬念型/对话型等）</div>
+
+ <div class="gen-row">
+  <button id="batchBtn" class="batch-btn" onclick="triggerGenerate()">一键生成脚本</button>
+  <button id="pauseBtn" class="pause-btn" onclick="pauseGenerate()" style="display:none;">暂停生成</button>
+  <button id="saveBtn" class="save-btn" onclick="saveAllScripts()">保存脚本</button>
+  <div class="desc">MiniMax M2.7 · 34种风格 · 标题+正文同时生成</div>
+  <div class="pw-row" style="margin-left:auto;">
+   <span class="pw-label" id="pwStatus">未设密码</span>
+   <button id="pwChangeBtn" class="pw-btn" onclick="showPwModal('setPw')">设密码</button>
+   <button id="pwClearBtn" class="pw-btn" onclick="showPwModal('clearPw')" style="display:none;">清除密码</button>
+  </div>
+ </div>
+</div>
+
+<div id="genProgress">
+ <span id="genStatus">等待生成...</span>
+ <div class="bar-wrap"><div class="bar" id="genBar"></div></div>
+</div>
+
+<div class="filters">
+ <div class="filter-group"><label>大区</label><select id="regionFilter" onchange="filterCards()"><option value="">全部大区</option><option value="华北">华北</option><option value="华南">华南</option><option value="华中">华中</option><option value="总部">总部</option></select></div>
+ <div class="filter-group"><label>风格</label><select id="styleFilter" onchange="filterCards()"><option value="">全部风格</option><option value="快讯">快讯</option><option value="故事">故事</option><option value="数据">数据</option><option value="悬念">悬念</option><option value="提问">提问</option><option value="清单">清单</option><option value="揭秘">揭秘</option><option value="证言">证言</option><option value="对比">对比</option><option value="热点">热点</option></select></div>
+ <div class="filter-group"><label>CS姓名</label><select id="csFilter" onchange="filterCards()"><option value="">全部CS</option>
+<option value="张继霖">张继霖</option>
+<option value="刘磊">刘磊</option>
+<option value="卫中杰">卫中杰</option>
+<option value="孙浩">孙浩</option>
+<option value="张松">张松</option>
+<option value="李康">李康</option>
+<option value="程新佳">程新佳</option>
+<option value="胡琦博">胡琦博</option>
+<option value="白陆">白陆</option>
+<option value="陈凯奇">陈凯奇</option>
+<option value="高振杰">高振杰</option>
+<option value="徐杰">徐杰</option>
+<option value="李凯">李凯</option>
+<option value="李剑锋">李剑锋</option>
+<option value="李琦">李琦</option>
+<option value="王进干">王进干</option>
+<option value="赵珂">赵珂</option>
+<option value="郭凯">郭凯</option>
+<option value="黄铁创">黄铁创</option>
+<option value="丁美平">丁美平</option>
+<option value="韦娇月">韦娇月</option>
+<option value="廖文静">廖文静</option>
+<option value="何建岳">何建岳</option>
+<option value="张小丽">张小丽</option>
+<option value="杨浩">杨浩</option>
+<option value="熊新月">熊新月</option>
+<option value="王振兴">王振兴</option>
+<option value="王跃琦">王跃琦</option>
+<option value="田炎晖">田炎晖</option>
+<option value="胡伟">胡伟</option>
+<option value="袁程">袁程</option>
+<option value="桑瑶瑶">桑瑶瑶</option>
+<option value="王芳颖">王芳颖</option>
+<option value="李娜">李娜</option>
+ </select></div>
+ <button onclick="expandAll()" style="background:#fff;border:1px solid #ddd;padding:4px 12px;border-radius:5px;font-size:11px;cursor:pointer;margin-right:6px;">全部展开</button>
+ <button onclick="collapseAll()" style="background:#fff;border:1px solid #ddd;padding:4px 12px;border-radius:5px;font-size:11px;cursor:pointer;">全部收起</button>
+ <div class="stats">脚本库：34条　|　显示：<span class="green" id="filteredCount">34</span> 条</div>
+</div>
+
+<div class="container">
+ <div class="section-label">千店里程碑脚本库 · 34条（v16.1 · 9种风格 · 差异化表达）</div>
+ <div class="card-grid" id="cardGrid">
+
+<div class="card" data-region="华北" data-cs="张继霖" data-style="快讯">
+  <div class="card-header">
+    <div class="card-title">【快讯】华北老板注意！联想百应1年干到1000家店</div>
+    <span class="badge badge-north">华北</span>
+  </div>
+  <div class="card-meta">
+    <span>CS：<strong>张继霖</strong></span>
+    <span class="city">城市：华北地区</span>
+  </div>
+  <div class="card-desc">风格：快讯播报 · 适用城市：华北地区 · 录制时长：45-60秒</div>
+  <div class="card-content" id="content-张继霖">华北的IT老板们，同步一个行业动态。<br><br>9月21号，联想百应服务中心突破1000家了。去年这时候才500家，一年翻倍。<br><br>啥概念？全国29个省、200多个城市，到处都有联想百应的牌子。单是一个服务商，最多的开了12家店。近30%的服务商，开了2家以上。<br><br>这说明啥？这模式跑通了，能复制，能赚钱。<br><br>华北这边，加入的门店平均每月多接30单，获客成本降了40%。<br><br>想了解的，评论区扣「想了解」，我私信你。<br><br>——张继霖</div>
+  <div class="card-actions">
+    <span class="expand-btn" onclick="toggleExpand(this,'content-张继霖')">展开全文</span>
+    <button class="copy-btn" onclick="copyScript('张继霖')">一键复制</button>
+  </div>
+</div>
+
+<div class="card" data-region="华北" data-cs="刘磊" data-style="故事">
+  <div class="card-header">
+    <div class="card-title">【故事】郑州一个维修店老板，怎么一年开出第二家店</div>
+    <span class="badge badge-north">华北</span>
+  </div>
+  <div class="card-meta">
+    <span>CS：<strong>刘磊</strong></span>
+    <span class="city">城市：郑州</span>
+  </div>
+  <div class="card-desc">风格：故事叙述 · 适用城市：郑州 · 录制时长：60-90秒</div>
+  <div class="card-content" id="content-刘磊">郑州的老王，开了八年电脑维修店，去年这时候还在发愁——美团上评分上不去，新客户越来越少。<br><br>后来加入了联想百应。美团、抖音、高德，三个平台同时上线，流量哗啦啦进来。第一个月就多了40单。<br><br>上个月，老王开了第二家店。<br><br>9月21号，联想百应全国突破1000家。像老王这样的，全国到处都是。1年时间，从500家干到1000家，29个省200多个城市。<br><br>郑州已经有不少老板在做了。你想不想试试？评论区扣「想了解」。<br><br>——刘磊</div>
+  <div class="card-actions">
+    <span class="expand-btn" onclick="toggleExpand(this,'content-刘磊')">展开全文</span>
+    <button class="copy-btn" onclick="copyScript('刘磊')">一键复制</button>
+  </div>
+</div>
+
+<div class="card" data-region="华北" data-cs="卫中杰" data-style="数据">
+  <div class="card-header">
+    <div class="card-title">【数据】太原IT门店：1000家背后的三个数字</div>
+    <span class="badge badge-north">华北</span>
+  </div>
+  <div class="card-meta">
+    <span>CS：<strong>卫中杰</strong></span>
+    <span class="city">城市：太原</span>
+  </div>
+  <div class="card-desc">风格：数据解读 · 适用城市：太原 · 录制时长：60-90秒</div>
+  <div class="card-content" id="content-卫中杰">太原的老板们，看三个数字。<br><br>第一个：1年。联想百应从500家到1000家，只用了一年。<br><br>第二个：12家。单个服务商，最多开了12家门店。<br><br>第三个：30%。近30%的服务商，开了2家以上。<br><br>这说明什么？这不是一锤子买卖，是能持续扩张的生意。<br><br>太原这边，加入的门店营收平均提升20%以上。美团、抖音、高德全平台引流，移动、电信的运营商订单直接派给你。<br><br>想了解的，评论区扣「想了解」。<br><br>——卫中杰</div>
+  <div class="card-actions">
+    <span class="expand-btn" onclick="toggleExpand(this,'content-卫中杰')">展开全文</span>
+    <button class="copy-btn" onclick="copyScript('卫中杰')">一键复制</button>
+  </div>
+</div>
+
+<div class="card" data-region="华北" data-cs="孙浩" data-style="悬念">
+  <div class="card-header">
+    <div class="card-title">【悬念】济南这家维修店，凭什么敢开第二家分店？</div>
+    <span class="badge badge-north">华北</span>
+  </div>
+  <div class="card-meta">
+    <span>CS：<strong>孙浩</strong></span>
+    <span class="city">城市：济南</span>
+  </div>
+  <div class="card-desc">风格：悬念设置 · 适用城市：济南 · 录制时长：60-90秒</div>
+  <div class="card-content" id="content-孙浩">济南的老李，去年还在纠结要不要关店。今年，他开了第二家分店。<br><br>凭什么？<br><br>就凭联想百应的1000家门店网络。9月21号刚突破的，1年翻倍，29个省200多个城市。<br><br>老李说，以前是自己找客户，现在是客户找上门。美团、抖音、高德，三个平台同时给他导流。移动、电信的运营商订单，直接派到他店里。<br><br>济南已经有门店在做了，客户稳定性明显增强。<br><br>你想知道怎么操作的吗？评论区扣「想了解」。<br><br>——孙浩</div>
+  <div class="card-actions">
+    <span class="expand-btn" onclick="toggleExpand(this,'content-孙浩')">展开全文</span>
+    <button class="copy-btn" onclick="copyScript('孙浩')">一键复制</button>
+  </div>
+</div>
+
+<div class="card" data-region="华北" data-cs="张松" data-style="提问">
+  <div class="card-header">
+    <div class="card-title">【提问】北京IT老板：你的门店为什么缺客户？</div>
+    <span class="badge badge-north">华北</span>
+  </div>
+  <div class="card-meta">
+    <span>CS：<strong>张松</strong></span>
+    <span class="city">城市：北京</span>
+  </div>
+  <div class="card-desc">风格：提问式 · 适用城市：北京 · 录制时长：60-90秒</div>
+  <div class="card-content" id="content-张松">北京的IT老板们，问你三个问题。<br><br>第一，你的客户是不是越来越少？<br><br>第二，美团、抖音上是不是竞争不过别人？<br><br>第三，想扩张，是不是缺品牌、缺资源、缺底气？<br><br>如果中了一条，听听这个：9月21号，联想百应服务中心突破1000家。1年时间，从500家干到1000家，29个省200多个城市。<br><br>北京这边，加入的门店获客成本降了40%。美团、抖音、高德全平台引流，移动、电信的订单直接派单。还有AI服务，百应AI主机，这是未来的竞争力。<br><br>北京已经有大量门店加入了。你想了解的，评论区扣「想了解」。<br><br>——张松</div>
+  <div class="card-actions">
+    <span class="expand-btn" onclick="toggleExpand(this,'content-张松')">展开全文</span>
+    <button class="copy-btn" onclick="copyScript('张松')">一键复制</button>
+  </div>
+</div>
+
+<div class="card" data-region="华北" data-cs="李康" data-style="对比">
+  <div class="card-header">
+    <div class="card-title">【对比】西安IT门店：单打独斗 vs 借力千店网络</div>
+    <span class="badge badge-north">华北</span>
+  </div>
+  <div class="card-meta">
+    <span>CS：<strong>李康</strong></span>
+    <span class="city">城市：西安</span>
+  </div>
+  <div class="card-desc">风格：对比分析 · 适用城市：西安 · 录制时长：60-90秒</div>
+  <div class="card-content" id="content-李康">西安的老板们，两种活法，你选哪种？<br><br>第一种：自己干。美团不会运营，抖音不会拍，客户越来越少，备件越拿越贵。<br><br>第二种：借力。联想百应1000家门店，9月21号刚突破的。1年翻倍，29个省200多个城市。美团、抖音、高德全平台帮你运营，移动、电信的订单直接派给你。百应AI主机，让你提前布局AI服务。<br><br>西安已经有门店加入，平均每月多接40单新客户。<br><br>与其等着被市场淘汰，不如主动出击。评论区扣「想了解」。<br><br>——李康</div>
+  <div class="card-actions">
+    <span class="expand-btn" onclick="toggleExpand(this,'content-李康')">展开全文</span>
+    <button class="copy-btn" onclick="copyScript('李康')">一键复制</button>
+  </div>
+</div>
+
+<div class="card" data-region="华北" data-cs="程新佳" data-style="热点">
+  <div class="card-header">
+    <div class="card-title">【热点】沈阳老板注意：联想百应1000家店，东北市场要变天</div>
+    <span class="badge badge-north">华北</span>
+  </div>
+  <div class="card-meta">
+    <span>CS：<strong>程新佳</strong></span>
+    <span class="city">城市：沈阳</span>
+  </div>
+  <div class="card-desc">风格：热点追踪 · 适用城市：沈阳 · 录制时长：45-60秒</div>
+  <div class="card-content" id="content-程新佳">沈阳的IT老板们，关注一个行业动态。<br><br>9月21号，联想百应服务中心突破1000家。1年时间，从500家干到1000家，29个省200多个城市。<br><br>东北市场，联想百应已经全面铺开。沈阳这边，加入的门店营收提升了20%以上。<br><br>美团、抖音、高德全平台引流，移动、电信的运营商订单直接派单。还有AI服务，百应AI主机，这是未来的竞争力。<br><br>沈阳已经有门店在做了。评论区留言，我们聊聊。<br><br>——程新佳</div>
+  <div class="card-actions">
+    <span class="expand-btn" onclick="toggleExpand(this,'content-程新佳')">展开全文</span>
+    <button class="copy-btn" onclick="copyScript('程新佳')">一键复制</button>
+  </div>
+</div>
+
+<div class="card" data-region="华北" data-cs="胡琦博" data-style="证言">
+  <div class="card-header">
+    <div class="card-title">【证言】天津一个服务商：从1家店到3家店，我只用了一年</div>
+    <span class="badge badge-north">华北</span>
+  </div>
+  <div class="card-meta">
+    <span>CS：<strong>胡琦博</strong></span>
+    <span class="city">城市：天津</span>
+  </div>
+  <div class="card-desc">风格：用户证言 · 适用城市：天津 · 录制时长：60-90秒</div>
+  <div class="card-content" id="content-胡琦博">天津的老赵，去年这个时候还在犹豫要不要加入联想百应。今年，他已经开了3家店。<br><br>"以前是自己找客户，现在是客户找上门。美团、抖音、高德，三个平台同时给我导流。移动、电信的订单，直接派到我店里。"<br><br>9月21号，联想百应全国突破1000家。像老赵这样的，全国到处都是。1年翻倍，29个省200多个城市。单个服务商最多开12家，近30%开了2家以上。<br><br>天津IT服务市场正在洗牌。你想做洗牌的还是被洗的？私信我了解详情。<br><br>——胡琦博</div>
+  <div class="card-actions">
+    <span class="expand-btn" onclick="toggleExpand(this,'content-胡琦博')">展开全文</span>
+    <button class="copy-btn" onclick="copyScript('胡琦博')">一键复制</button>
+  </div>
+</div>
+
+<div class="card" data-region="华北" data-cs="白陆" data-style="快讯">
+  <div class="card-header">
+    <div class="card-title">【快讯】吉林IT门店：联想百应1000家，东北全面覆盖</div>
+    <span class="badge badge-north">华北</span>
+  </div>
+  <div class="card-meta">
+    <span>CS：<strong>白陆</strong></span>
+    <span class="city">城市：吉林</span>
+  </div>
+  <div class="card-desc">风格：快讯播报 · 适用城市：吉林 · 录制时长：45-60秒</div>
+  <div class="card-content" id="content-白陆">吉林的老板们，同步一个行业动态。<br><br>9月21号，联想百应服务中心突破1000家。1年时间，从500家到1000家，29个省200多个城市。<br><br>东北这边，联想百应已经全面覆盖。吉林加入的门店，客户来源明显多元化。美团、抖音、高德全平台引流，移动、电信的运营商订单直接派单。<br><br>还有AI服务，百应AI主机，这是未来的增量。<br><br>吉林IT服务的老板们，与其一个人硬扛，不如借力。想了解的，私信我。<br><br>——白陆</div>
+  <div class="card-actions">
+    <span class="expand-btn" onclick="toggleExpand(this,'content-白陆')">展开全文</span>
+    <button class="copy-btn" onclick="copyScript('白陆')">一键复制</button>
+  </div>
+</div>
+
+<div class="card" data-region="华北" data-cs="陈凯奇" data-style="悬念">
+  <div class="card-header">
+    <div class="card-title">【悬念】鲁东这家维修店，为什么敢在县城开旗舰店？</div>
+    <span class="badge badge-north">华北</span>
+  </div>
+  <div class="card-meta">
+    <span>CS：<strong>陈凯奇</strong></span>
+    <span class="city">城市：鲁东</span>
+  </div>
+  <div class="card-desc">风格：悬念设置 · 适用城市：鲁东 · 录制时长：60-90秒</div>
+  <div class="card-content" id="content-陈凯奇">鲁东的老刘，在县城开了家旗舰店。别人都说他疯了，他笑着说：我背后有1000家店。<br><br>9月21号，联想百应服务中心突破1000家。1年时间，从500家到1000家，29个省200多个城市。<br><br>老刘说，以前是自己找客户，现在是客户找上门。美团、抖音、高德全平台引流，移动、电信的订单直接派单。还有AI服务，百应AI主机，这是未来的竞争力。<br><br>鲁东已经有门店加入，平均每月新增客户30单以上。<br><br>想改变现状的老板，现在就是最好的时机。评论区扣「想了解」，我私信你。<br><br>——陈凯奇</div>
+  <div class="card-actions">
+    <span class="expand-btn" onclick="toggleExpand(this,'content-陈凯奇')">展开全文</span>
+    <button class="copy-btn" onclick="copyScript('陈凯奇')">一键复制</button>
+  </div>
+</div>
+
+<div class="card" data-region="华南" data-cs="高振杰" data-style="数据">
+  <div class="card-header">
+    <div class="card-title">【数据】华南IT门店：1000家背后的增长密码</div>
+    <span class="badge badge-south">华南</span>
+  </div>
+  <div class="card-meta">
+    <span>CS：<strong>高振杰</strong></span>
+    <span class="city">城市：华南地区</span>
+  </div>
+  <div class="card-desc">风格：数据解读 · 适用城市：华南地区 · 录制时长：60-90秒</div>
+  <div class="card-content" id="content-高振杰">华南的老板们，看几个数字。<br><br>1年，从500家到1000家。29个省，200多个城市。单个服务商最多12家店，近30%开了2家以上。<br><br>华南区这边，加入的门店平均获客成本下降40%，营收增长25%以上。<br><br>怎么做到的？美团、抖音、高德全平台引流，移动、电信的运营商订单直接派单。还有AI服务，百应AI主机，这是未来的增量。<br><br>华南区已经有大量门店验证，成功经验可以复制。想了解怎么加入，评论区扣「想了解」，我私信你。<br><br>——高振杰</div>
+  <div class="card-actions">
+    <span class="expand-btn" onclick="toggleExpand(this,'content-高振杰')">展开全文</span>
+    <button class="copy-btn" onclick="copyScript('高振杰')">一键复制</button>
+  </div>
+</div>
+
+<div class="card" data-region="华南" data-cs="徐杰" data-style="故事">
+  <div class="card-header">
+    <div class="card-title">【故事】长沙一个90后老板，怎么把维修店做成连锁</div>
+    <span class="badge badge-south">华南</span>
+  </div>
+  <div class="card-meta">
+    <span>CS：<strong>徐杰</strong></span>
+    <span class="city">城市：长沙</span>
+  </div>
+  <div class="card-desc">风格：故事叙述 · 适用城市：长沙 · 录制时长：60-90秒</div>
+  <div class="card-content" id="content-徐杰">长沙的小陈，90后，去年接手家里的维修店，差点倒闭。今年，他开了第二家分店。<br><br>转折点就是加入联想百应。9月21号，联想百应全国突破1000家。1年时间，从500家到1000家，29个省200多个城市。<br><br>小陈说，以前是自己找客户，现在是客户找上门。美团、抖音、高德全平台引流，移动、电信的订单直接派单。还有AI服务，百应AI主机，这是未来的竞争力。<br><br>长沙已经有门店加入，平均每月多接40单新客户。<br><br>长沙的同行已经先行一步了，你来不来？想了解的，私信我。<br><br>——徐杰</div>
+  <div class="card-actions">
+    <span class="expand-btn" onclick="toggleExpand(this,'content-徐杰')">展开全文</span>
+    <button class="copy-btn" onclick="copyScript('徐杰')">一键复制</button>
+  </div>
+</div>
+
+<div class="card" data-region="华南" data-cs="李凯" data-style="对比">
+  <div class="card-header">
+    <div class="card-title">【对比】深圳IT门店：自己摸索 vs 站在1000家肩膀上</div>
+    <span class="badge badge-south">华南</span>
+  </div>
+  <div class="card-meta">
+    <span>CS：<strong>李凯</strong></span>
+    <span class="city">城市：深圳</span>
+  </div>
+  <div class="card-desc">风格：对比分析 · 适用城市：深圳 · 录制时长：60-90秒</div>
+  <div class="card-content" id="content-李凯">深圳的老板们，两种选择。<br><br>第一种：自己摸索。美团不会运营，抖音不会拍，客户越来越少，成本越来越高。<br><br>第二种：站在1000家肩膀上。联想百应9月21号突破1000家，1年翻倍，29个省200多个城市。美团、抖音、高德全平台帮你运营，移动、电信的订单直接派给你。百应AI主机，让你提前布局AI服务。<br><br>深圳已经有大量门店加入，平均营收增长25%以上。<br><br>深圳IT服务的老板们，这次机会你要不要了解一下？评论区留言。<br><br>——李凯</div>
+  <div class="card-actions">
+    <span class="expand-btn" onclick="toggleExpand(this,'content-李凯')">展开全文</span>
+    <button class="copy-btn" onclick="copyScript('李凯')">一键复制</button>
+  </div>
+</div>
+
+<div class="card" data-region="华南" data-cs="李剑锋" data-style="热点">
+  <div class="card-header">
+    <div class="card-title">【热点】深圳老板注意：联想百应1000家店，华南市场要爆发</div>
+    <span class="badge badge-south">华南</span>
+  </div>
+  <div class="card-meta">
+    <span>CS：<strong>李剑锋</strong></span>
+    <span class="city">城市：深圳</span>
+  </div>
+  <div class="card-desc">风格：热点追踪 · 适用城市：深圳 · 录制时长：45-60秒</div>
+  <div class="card-content" id="content-李剑锋">深圳的IT老板们，关注一个行业动态。<br><br>9月21号，联想百应服务中心突破1000家。1年时间，从500家干到1000家，29个省200多个城市。<br><br>华南市场，联想百应已经全面铺开。深圳这边，加入的门店平均营收增长25%以上。<br><br>美团、抖音、高德全平台引流，移动、电信的运营商订单直接派单。还有AI服务，百应AI主机，这是未来的竞争力。<br><br>深圳IT服务的老板们，这次机会你要不要了解一下？评论区留言。<br><br>——李剑锋</div>
+  <div class="card-actions">
+    <span class="expand-btn" onclick="toggleExpand(this,'content-李剑锋')">展开全文</span>
+    <button class="copy-btn" onclick="copyScript('李剑锋')">一键复制</button>
+  </div>
+</div>
+
+<div class="card" data-region="华南" data-cs="李琦" data-style="证言">
+  <div class="card-header">
+    <div class="card-title">【证言】南宁一个服务商：从濒临倒闭到月增40单</div>
+    <span class="badge badge-south">华南</span>
+  </div>
+  <div class="card-meta">
+    <span>CS：<strong>李琦</strong></span>
+    <span class="city">城市：南宁</span>
+  </div>
+  <div class="card-desc">风格：用户证言 · 适用城市：南宁 · 录制时长：60-90秒</div>
+  <div class="card-content" id="content-李琦">南宁的老黄，去年这个时候还在发愁要不要关店。今年，他的店月增40单新客户。<br><br>"以前是自己找客户，现在是客户找上门。美团、抖音、高德，三个平台同时给我导流。移动、电信的订单，直接派到我店里。"<br><br>9月21号，联想百应全国突破1000家。像老黄这样的，全国到处都是。1年翻倍，29个省200多个城市。<br><br>南宁IT服务市场正在分化。你想做哪一边？私信我，我们聊聊。<br><br>——李琦</div>
+  <div class="card-actions">
+    <span class="expand-btn" onclick="toggleExpand(this,'content-李琦')">展开全文</span>
+    <button class="copy-btn" onclick="copyScript('李琦')">一键复制</button>
+  </div>
+</div>
+
+<div class="card" data-region="华南" data-cs="王进干" data-style="快讯">
+  <div class="card-header">
+    <div class="card-title">【快讯】广州IT门店：联想百应1000家，华南全面覆盖</div>
+    <span class="badge badge-south">华南</span>
+  </div>
+  <div class="card-meta">
+    <span>CS：<strong>王进干</strong></span>
+    <span class="city">城市：广州</span>
+  </div>
+  <div class="card-desc">风格：快讯播报 · 适用城市：广州 · 录制时长：45-60秒</div>
+  <div class="card-content" id="content-王进干">广州的老板们，同步一个行业动态。<br><br>9月21号，联想百应服务中心突破1000家。1年时间，从500家到1000家，29个省200多个城市。<br><br>华南这边，联想百应已经全面覆盖。广州加入的门店，平均获客成本下降明显。美团、抖音、高德全平台引流，移动、电信的运营商订单直接派单。<br><br>还有AI服务，百应AI主机，这是未来的增量。<br><br>广州已经有大量同行开始行动了，你呢？评论区扣「想了解」，我私信你。<br><br>——王进干</div>
+  <div class="card-actions">
+    <span class="expand-btn" onclick="toggleExpand(this,'content-王进干')">展开全文</span>
+    <button class="copy-btn" onclick="copyScript('王进干')">一键复制</button>
+  </div>
+</div>
+
+<div class="card" data-region="华南" data-cs="赵珂" data-style="悬念">
+  <div class="card-header">
+    <div class="card-title">【悬念】贵阳这家维修店，为什么敢在商圈开旗舰店？</div>
+    <span class="badge badge-south">华南</span>
+  </div>
+  <div class="card-meta">
+    <span>CS：<strong>赵珂</strong></span>
+    <span class="city">城市：贵阳</span>
+  </div>
+  <div class="card-desc">风格：悬念设置 · 适用城市：贵阳 · 录制时长：60-90秒</div>
+  <div class="card-content" id="content-赵珂">贵阳的老吴，在商圈开了家旗舰店。别人都说他疯了，他笑着说：我背后有1000家店。<br><br>9月21号，联想百应服务中心突破1000家。1年时间，从500家到1000家，29个省200多个城市。<br><br>老吴说，以前是自己找客户，现在是客户找上门。美团、抖音、高德全平台引流，移动、电信的订单直接派单。还有AI服务，百应AI主机，这是未来的竞争力。<br><br>贵阳已经有门店加入，平均每月新增客户30单以上。<br><br>贵州的老板们，这次机会你要不要了解一下？评论区留言。<br><br>——赵珂</div>
+  <div class="card-actions">
+    <span class="expand-btn" onclick="toggleExpand(this,'content-赵珂')">展开全文</span>
+    <button class="copy-btn" onclick="copyScript('赵珂')">一键复制</button>
+  </div>
+</div>
+
+<div class="card" data-region="华南" data-cs="郭凯" data-style="清单">
+  <div class="card-header">
+    <div class="card-title">【清单】福州IT门店加入联想百应的5个理由</div>
+    <span class="badge badge-south">华南</span>
+  </div>
+  <div class="card-meta">
+    <span>CS：<strong>郭凯</strong></span>
+    <span class="city">城市：福州</span>
+  </div>
+  <div class="card-desc">风格：清单式 · 适用城市：福州 · 录制时长：60-90秒</div>
+  <div class="card-content" id="content-郭凯">福州的IT老板们，给你5个加入联想百应的理由。<br><br>第一，品牌背书。联想百应，9月21号刚突破1000家店，1年翻倍，29个省200多个城市。<br><br>第二，流量支持。美团、抖音、高德全平台帮你运营，客户主动找上门。<br><br>第三，订单稳定。移动、电信的运营商订单，直接派到你店里。<br><br>第四，AI赋能。百应AI主机，让你提前布局AI服务，抢占未来市场。<br><br>第五，规模验证。单个服务商最多开12家，近30%开了2家以上。福州这边，加入的门店营收有了明显提升。<br><br>福州IT服务的老板们，与其等着被淘汰，不如主动出击。私信我了解详情。<br><br>——郭凯</div>
+  <div class="card-actions">
+    <span class="expand-btn" onclick="toggleExpand(this,'content-郭凯')">展开全文</span>
+    <button class="copy-btn" onclick="copyScript('郭凯')">一键复制</button>
+  </div>
+</div>
+
+<div class="card" data-region="华南" data-cs="黄铁创" data-style="数据">
+  <div class="card-header">
+    <div class="card-title">【数据】广州IT门店：1000家背后的三个关键数字</div>
+    <span class="badge badge-south">华南</span>
+  </div>
+  <div class="card-meta">
+    <span>CS：<strong>黄铁创</strong></span>
+    <span class="city">城市：广州</span>
+  </div>
+  <div class="card-desc">风格：数据解读 · 适用城市：广州 · 录制时长：60-90秒</div>
+  <div class="card-content" id="content-黄铁创">广州的老板们，看三个数字。<br><br>第一个：1年。联想百应从500家到1000家，只用了一年。<br><br>第二个：12家。单个服务商，最多开了12家门店。<br><br>第三个：30%。近30%的服务商，开了2家以上。<br><br>这说明什么？这不是一锤子买卖，是能持续扩张的生意。<br><br>广州这边，加入的门店平均获客成本下降明显。美团、抖音、高德全平台引流，移动、电信的运营商订单直接派给你。<br><br>广州已经有大量同行开始行动了，你呢？评论区扣「想了解」，我私信你。<br><br>——黄铁创</div>
+  <div class="card-actions">
+    <span class="expand-btn" onclick="toggleExpand(this,'content-黄铁创')">展开全文</span>
+    <button class="copy-btn" onclick="copyScript('黄铁创')">一键复制</button>
+  </div>
+</div>
+
+<div class="card" data-region="华南" data-cs="丁美平" data-style="故事">
+  <div class="card-header">
+    <div class="card-title">【故事】安徽一个维修店老板，怎么一年开出第二家店</div>
+    <span class="badge badge-south">华南</span>
+  </div>
+  <div class="card-meta">
+    <span>CS：<strong>丁美平</strong></span>
+    <span class="city">城市：安徽</span>
+  </div>
+  <div class="card-desc">风格：故事叙述 · 适用城市：安徽 · 录制时长：60-90秒</div>
+  <div class="card-content" id="content-丁美平">安徽的老孙，开了十年电脑维修店，去年这时候还在发愁——美团上评分上不去，新客户越来越少。<br><br>后来加入了联想百应。美团、抖音、高德，三个平台同时上线，流量哗啦啦进来。第一个月就多了40单。<br><br>上个月，老孙开了第二家店。<br><br>9月21号，联想百应全国突破1000家。像老孙这样的，全国到处都是。1年时间，从500家干到1000家，29个省200多个城市。<br><br>安徽已经有不少老板在做了。你想不想试试？评论区扣「想了解」。<br><br>——丁美平</div>
+  <div class="card-actions">
+    <span class="expand-btn" onclick="toggleExpand(this,'content-丁美平')">展开全文</span>
+    <button class="copy-btn" onclick="copyScript('丁美平')">一键复制</button>
+  </div>
+</div>
+
+<div class="card" data-region="华南" data-cs="韦娇月" data-style="对比">
+  <div class="card-header">
+    <div class="card-title">【对比】安徽IT门店：单打独斗 vs 借力千店网络</div>
+    <span class="badge badge-south">华南</span>
+  </div>
+  <div class="card-meta">
+    <span>CS：<strong>韦娇月</strong></span>
+    <span class="city">城市：安徽</span>
+  </div>
+  <div class="card-desc">风格：对比分析 · 适用城市：安徽 · 录制时长：60-90秒</div>
+  <div class="card-content" id="content-韦娇月">安徽的老板们，两种活法，你选哪种？<br><br>第一种：自己干。美团不会运营，抖音不会拍，客户越来越少，备件越拿越贵。<br><br>第二种：借力。联想百应1000家门店，9月21号刚突破的。1年翻倍，29个省200多个城市。美团、抖音、高德全平台帮你运营，移动、电信的订单直接派给你。百应AI主机，让你提前布局AI服务。<br><br>安徽已经有门店加入，平均每月多接40单新客户。<br><br>安徽的同行们，有人已经在做了，你来不来？评论区扣「想了解」。<br><br>——韦娇月</div>
+  <div class="card-actions">
+    <span class="expand-btn" onclick="toggleExpand(this,'content-韦娇月')">展开全文</span>
+    <button class="copy-btn" onclick="copyScript('韦娇月')">一键复制</button>
+  </div>
+</div>
+
+<div class="card" data-region="华中" data-cs="廖文静" data-style="数据">
+  <div class="card-header">
+    <div class="card-title">【数据】华中IT门店：1000家背后的增长逻辑</div>
+    <span class="badge badge-central">华中</span>
+  </div>
+  <div class="card-meta">
+    <span>CS：<strong>廖文静</strong></span>
+    <span class="city">城市：华中地区</span>
+  </div>
+  <div class="card-desc">风格：数据解读 · 适用城市：华中地区 · 录制时长：60-90秒</div>
+  <div class="card-content" id="content-廖文静">华中的老板们，看几个数字。<br><br>1年，从500家到1000家。29个省，200多个城市。单个服务商最多12家店，近30%开了2家以上。<br><br>华中区这边，加入的门店平均获客成本下降40%，营收增长25%以上。<br><br>怎么做到的？美团、抖音、高德全平台引流，移动、电信的运营商订单直接派单。还有AI服务，百应AI主机，这是未来的增量。<br><br>华中区已经有大量门店验证，成功经验可以复制。想了解怎么加入，评论区扣「想了解」。<br><br>——廖文静</div>
+  <div class="card-actions">
+    <span class="expand-btn" onclick="toggleExpand(this,'content-廖文静')">展开全文</span>
+    <button class="copy-btn" onclick="copyScript('廖文静')">一键复制</button>
+  </div>
+</div>
+
+<div class="card" data-region="华中" data-cs="何建岳" data-style="快讯">
+  <div class="card-header">
+    <div class="card-title">【快讯】西北IT门店：联想百应1000家，西北全面覆盖</div>
+    <span class="badge badge-central">华中</span>
+  </div>
+  <div class="card-meta">
+    <span>CS：<strong>何建岳</strong></span>
+    <span class="city">城市：西北</span>
+  </div>
+  <div class="card-desc">风格：快讯播报 · 适用城市：西北 · 录制时长：45-60秒</div>
+  <div class="card-content" id="content-何建岳">西北的老板们，同步一个行业动态。<br><br>9月21号，联想百应服务中心突破1000家。1年时间，从500家到1000家，29个省200多个城市。<br><br>西北这边，联想百应已经全面覆盖。加入的门店，客户来源明显多元化。美团、抖音、高德全平台引流，移动、电信的运营商订单直接派单。<br><br>还有AI服务，百应AI主机，这是未来的增量。<br><br>西北IT服务的老板们，这次机会你要不要了解一下？评论区留言。<br><br>——何建岳</div>
+  <div class="card-actions">
+    <span class="expand-btn" onclick="toggleExpand(this,'content-何建岳')">展开全文</span>
+    <button class="copy-btn" onclick="copyScript('何建岳')">一键复制</button>
+  </div>
+</div>
+
+<div class="card" data-region="华中" data-cs="张小丽" data-style="故事">
+  <div class="card-header">
+    <div class="card-title">【故事】成都一个维修店老板，怎么把店做成区域标杆</div>
+    <span class="badge badge-central">华中</span>
+  </div>
+  <div class="card-meta">
+    <span>CS：<strong>张小丽</strong></span>
+    <span class="city">城市：成都</span>
+  </div>
+  <div class="card-desc">风格：故事叙述 · 适用城市：成都 · 录制时长：60-90秒</div>
+  <div class="card-content" id="content-张小丽">成都的老周，开了八年电脑维修店，去年这时候还在发愁——美团上评分上不去，新客户越来越少。<br><br>后来加入了联想百应。美团、抖音、高德，三个平台同时上线，流量哗啦啦进来。第一个月就多了40单。<br><br>现在，老周的店成了区域标杆。<br><br>9月21号，联想百应全国突破1000家。像老周这样的，全国到处都是。1年时间，从500家干到1000家，29个省200多个城市。<br><br>成都已经有大量门店加入，平均营收增长25%以上。<br><br>成都的同行们，有人已经在做了，你来不来？私信我，发你完整资料。<br><br>——张小丽</div>
+  <div class="card-actions">
+    <span class="expand-btn" onclick="toggleExpand(this,'content-张小丽')">展开全文</span>
+    <button class="copy-btn" onclick="copyScript('张小丽')">一键复制</button>
+  </div>
+</div>
+
+<div class="card" data-region="华中" data-cs="杨浩" data-style="对比">
+  <div class="card-header">
+    <div class="card-title">【对比】成都IT门店：自己摸索 vs 站在1000家肩膀上</div>
+    <span class="badge badge-central">华中</span>
+  </div>
+  <div class="card-meta">
+    <span>CS：<strong>杨浩</strong></span>
+    <span class="city">城市：成都</span>
+  </div>
+  <div class="card-desc">风格：对比分析 · 适用城市：成都 · 录制时长：60-90秒</div>
+  <div class="card-content" id="content-杨浩">成都的老板们，两种选择。<br><br>第一种：自己摸索。美团不会运营，抖音不会拍，客户越来越少，成本越来越高。<br><br>第二种：站在1000家肩膀上。联想百应9月21号突破1000家，1年翻倍，29个省200多个城市。美团、抖音、高德全平台帮你运营，移动、电信的订单直接派给你。百应AI主机，让你提前布局AI服务。<br><br>成都已经有大量门店加入，平均营收增长25%以上。<br><br>成都的同行们，有人已经在做了，你来不来？私信我，发你完整资料。<br><br>——杨浩</div>
+  <div class="card-actions">
+    <span class="expand-btn" onclick="toggleExpand(this,'content-杨浩')">展开全文</span>
+    <button class="copy-btn" onclick="copyScript('杨浩')">一键复制</button>
+  </div>
+</div>
+
+<div class="card" data-region="华中" data-cs="熊新月" data-style="悬念">
+  <div class="card-header">
+    <div class="card-title">【悬念】宁波这家维修店，为什么敢在写字楼开旗舰店？</div>
+    <span class="badge badge-central">华中</span>
+  </div>
+  <div class="card-meta">
+    <span>CS：<strong>熊新月</strong></span>
+    <span class="city">城市：宁波</span>
+  </div>
+  <div class="card-desc">风格：悬念设置 · 适用城市：宁波 · 录制时长：60-90秒</div>
+  <div class="card-content" id="content-熊新月">宁波的老郑，在写字楼开了家旗舰店。别人都说他疯了，他笑着说：我背后有1000家店。<br><br>9月21号，联想百应服务中心突破1000家。1年时间，从500家到1000家，29个省200多个城市。<br><br>老郑说，以前是自己找客户，现在是客户找上门。美团、抖音、高德全平台引流，移动、电信的订单直接派单。还有AI服务，百应AI主机，这是未来的竞争力。<br><br>宁波已经有门店加入，平均获客成本下降了40%。<br><br>宁波IT服务的老板们，想转型升级的，现在就是最好的时候。评论区扣「想了解」。<br><br>——熊新月</div>
+  <div class="card-actions">
+    <span class="expand-btn" onclick="toggleExpand(this,'content-熊新月')">展开全文</span>
+    <button class="copy-btn" onclick="copyScript('熊新月')">一键复制</button>
+  </div>
+</div>
+
+<div class="card" data-region="华中" data-cs="王振兴" data-style="揭秘">
+  <div class="card-header">
+    <div class="card-title">【揭秘】杭州IT门店：联想百应1000家店背后的运营逻辑</div>
+    <span class="badge badge-central">华中</span>
+  </div>
+  <div class="card-meta">
+    <span>CS：<strong>王振兴</strong></span>
+    <span class="city">城市：杭州</span>
+  </div>
+  <div class="card-desc">风格：揭秘式 · 适用城市：杭州 · 录制时长：60-90秒</div>
+  <div class="card-content" id="content-王振兴">杭州的老板们，揭秘一个事。<br><br>为什么联想百应能1年从500家干到1000家？9月21号刚突破的，29个省200多个城市。<br><br>核心就三点。<br><br>第一，流量打法。美团、抖音、高德全平台布局，不是让你自己摸索，是总部统一运营，流量直接导入门店。<br><br>第二，订单保障。移动、电信的运营商订单，直接派给合作门店。这是稳定客源，不是散客。<br><br>第三，AI卡位。百应AI主机，软硬服一体化，让你提前布局AI服务。这是未来的竞争力，不是现在的红海。<br><br>杭州这边，加入的门店平均营收增长25%以上。<br><br>杭州的老板们，与其一个人硬扛，不如看看别人是怎么做的。私信我了解详情。<br><br>——王振兴</div>
+  <div class="card-actions">
+    <span class="expand-btn" onclick="toggleExpand(this,'content-王振兴')">展开全文</span>
+    <button class="copy-btn" onclick="copyScript('王振兴')">一键复制</button>
+  </div>
+</div>
+
+<div class="card" data-region="华中" data-cs="王跃琦" data-style="热点">
+  <div class="card-header">
+    <div class="card-title">【热点】重庆老板注意：联想百应1000家店，西南市场要爆发</div>
+    <span class="badge badge-central">华中</span>
+  </div>
+  <div class="card-meta">
+    <span>CS：<strong>王跃琦</strong></span>
+    <span class="city">城市：重庆</span>
+  </div>
+  <div class="card-desc">风格：热点追踪 · 适用城市：重庆 · 录制时长：45-60秒</div>
+  <div class="card-content" id="content-王跃琦">重庆的IT老板们，关注一个行业动态。<br><br>9月21号，联想百应服务中心突破1000家。1年时间，从500家干到1000家，29个省200多个城市。<br><br>西南市场，联想百应已经全面铺开。重庆这边，加入的门店平均每月多接40单新客户。<br><br>美团、抖音、高德全平台引流，移动、电信的运营商订单直接派单。还有AI服务，百应AI主机，这是未来的竞争力。<br><br>重庆IT服务的老板们，这次机会你要不要了解一下？评论区留言。<br><br>——王跃琦</div>
+  <div class="card-actions">
+    <span class="expand-btn" onclick="toggleExpand(this,'content-王跃琦')">展开全文</span>
+    <button class="copy-btn" onclick="copyScript('王跃琦')">一键复制</button>
+  </div>
+</div>
+
+<div class="card" data-region="华中" data-cs="田炎晖" data-style="证言">
+  <div class="card-header">
+    <div class="card-title">【证言】武汉一个服务商：从1家店到区域龙头</div>
+    <span class="badge badge-central">华中</span>
+  </div>
+  <div class="card-meta">
+    <span>CS：<strong>田炎晖</strong></span>
+    <span class="city">城市：武汉</span>
+  </div>
+  <div class="card-desc">风格：用户证言 · 适用城市：武汉 · 录制时长：60-90秒</div>
+  <div class="card-content" id="content-田炎晖">武汉的老刘，去年这个时候还在犹豫要不要加入联想百应。今年，他的店成了区域龙头。<br><br>"以前是自己找客户，现在是客户找上门。美团、抖音、高德，三个平台同时给我导流。移动、电信的订单，直接派到我店里。"<br><br>9月21号，联想百应全国突破1000家。像老刘这样的，全国到处都是。1年翻倍，29个省200多个城市。单个服务商最多开12家，近30%开了2家以上。<br><br>武汉的老板们，有人已经开始行动了，你呢？私信我，我们聊聊。<br><br>——田炎晖</div>
+  <div class="card-actions">
+    <span class="expand-btn" onclick="toggleExpand(this,'content-田炎晖')">展开全文</span>
+    <button class="copy-btn" onclick="copyScript('田炎晖')">一键复制</button>
+  </div>
+</div>
+
+<div class="card" data-region="华中" data-cs="胡伟" data-style="快讯">
+  <div class="card-header">
+    <div class="card-title">【快讯】江苏IT门店：联想百应1000家，华东全面覆盖</div>
+    <span class="badge badge-central">华中</span>
+  </div>
+  <div class="card-meta">
+    <span>CS：<strong>胡伟</strong></span>
+    <span class="city">城市：江苏</span>
+  </div>
+  <div class="card-desc">风格：快讯播报 · 适用城市：江苏 · 录制时长：45-60秒</div>
+  <div class="card-content" id="content-胡伟">江苏的老板们，同步一个行业动态。<br><br>9月21号，联想百应服务中心突破1000家。1年时间，从500家到1000家，29个省200多个城市。<br><br>华东这边，联想百应已经全面覆盖。江苏加入的门店，平均获客成本下降40%。美团、抖音、高德全平台引流，移动、电信的运营商订单直接派单。<br><br>还有AI服务，百应AI主机，这是未来的增量。<br><br>江苏的同行们，这次机会你要不要了解一下？评论区扣「想了解」。<br><br>——胡伟</div>
+  <div class="card-actions">
+    <span class="expand-btn" onclick="toggleExpand(this,'content-胡伟')">展开全文</span>
+    <button class="copy-btn" onclick="copyScript('胡伟')">一键复制</button>
+  </div>
+</div>
+
+<div class="card" data-region="华中" data-cs="袁程" data-style="数据">
+  <div class="card-header">
+    <div class="card-title">【数据】苏州IT门店：1000家背后的三个关键数字</div>
+    <span class="badge badge-central">华中</span>
+  </div>
+  <div class="card-meta">
+    <span>CS：<strong>袁程</strong></span>
+    <span class="city">城市：苏州</span>
+  </div>
+  <div class="card-desc">风格：数据解读 · 适用城市：苏州 · 录制时长：60-90秒</div>
+  <div class="card-content" id="content-袁程">苏州的老板们，看三个数字。<br><br>第一个：1年。联想百应从500家到1000家，只用了一年。<br><br>第二个：12家。单个服务商，最多开了12家门店。<br><br>第三个：30%。近30%的服务商，开了2家以上。<br><br>这说明什么？这不是一锤子买卖，是能持续扩张的生意。<br><br>苏州这边，加入的门店营收提升了20%以上。美团、抖音、高德全平台引流，移动、电信的运营商订单直接派给你。<br><br>苏州IT服务的老板们，想改变的，现在就是最好的时候。私信我，发你完整资料。<br><br>——袁程</div>
+  <div class="card-actions">
+    <span class="expand-btn" onclick="toggleExpand(this,'content-袁程')">展开全文</span>
+    <button class="copy-btn" onclick="copyScript('袁程')">一键复制</button>
+  </div>
+</div>
+
+<div class="card" data-region="华中" data-cs="桑瑶瑶" data-style="故事">
+  <div class="card-header">
+    <div class="card-title">【故事】上海一个维修店老板，怎么在竞争中突围</div>
+    <span class="badge badge-central">华中</span>
+  </div>
+  <div class="card-meta">
+    <span>CS：<strong>桑瑶瑶</strong></span>
+    <span class="city">城市：上海</span>
+  </div>
+  <div class="card-desc">风格：故事叙述 · 适用城市：上海 · 录制时长：60-90秒</div>
+  <div class="card-content" id="content-桑瑶瑶">上海的老王，在竞争最激烈的商圈开了十年维修店，去年差点撑不下去。今年，他的店成了区域标杆。<br><br>转折点就是加入联想百应。9月21号，联想百应全国突破1000家。1年时间，从500家干到1000家，29个省200多个城市。<br><br>老王说，以前是自己找客户，现在是客户找上门。美团、抖音、高德全平台引流，移动、电信的订单直接派单。还有AI服务，百应AI主机，这是未来的竞争力。<br><br>上海已经有大量门店加入，平均营收增长25%以上。<br><br>上海IT服务的老板们，大城市更需要借力。评论区扣「想了解」，我私信你。<br><br>——桑瑶瑶</div>
+  <div class="card-actions">
+    <span class="expand-btn" onclick="toggleExpand(this,'content-桑瑶瑶')">展开全文</span>
+    <button class="copy-btn" onclick="copyScript('桑瑶瑶')">一键复制</button>
+  </div>
+</div>
+
+<div class="card" data-region="总部" data-cs="王芳颖" data-style="证言">
+  <div class="card-header">
+    <div class="card-title">【证言】成都一个服务商：从濒临倒闭到月增40单</div>
+    <span class="badge badge-hq">总部</span>
+  </div>
+  <div class="card-meta">
+    <span>CS：<strong>王芳颖</strong></span>
+    <span class="city">城市：成都</span>
+  </div>
+  <div class="card-desc">风格：用户证言 · 适用城市：成都 · 录制时长：60-90秒</div>
+  <div class="card-content" id="content-王芳颖">成都的老李，去年这个时候还在发愁要不要关店。今年，他的店月增40单新客户。<br><br>"以前是自己找客户，现在是客户找上门。美团、抖音、高德，三个平台同时给我导流。移动、电信的订单，直接派到我店里。"<br><br>9月21号，联想百应全国突破1000家。像老李这样的，全国到处都是。1年翻倍，29个省200多个城市。<br><br>成都的同行们，有人已经在做了，你来不来？私信我，发你完整资料。<br><br>——王芳颖</div>
+  <div class="card-actions">
+    <span class="expand-btn" onclick="toggleExpand(this,'content-王芳颖')">展开全文</span>
+    <button class="copy-btn" onclick="copyScript('王芳颖')">一键复制</button>
+  </div>
+</div>
+
+<div class="card" data-region="总部" data-cs="李娜" data-style="快讯">
+  <div class="card-header">
+    <div class="card-title">【快讯】全国招募：联想百应1000家店，寻找下一批合作伙伴</div>
+    <span class="badge badge-hq">总部</span>
+  </div>
+  <div class="card-meta">
+    <span>CS：<strong>李娜</strong></span>
+    <span class="city">城市：联想百应</span>
+  </div>
+  <div class="card-desc">风格：快讯播报 · 适用城市：全国 · 录制时长：45-60秒</div>
+  <div class="card-content" id="content-李娜">全国的IT老板们，同步一个行业动态。<br><br>9月21号，联想百应服务中心突破1000家。1年时间，从500家到1000家，29个省200多个城市。<br><br>单个服务商最多开12家店，近30%开了2家以上。这说明什么？这模式跑通了，能复制，能赚钱。<br><br>美团、抖音、高德全平台引流，移动、电信的运营商订单直接派单。还有AI服务，百应AI主机，这是未来的增量。<br><br>我们已经有大量门店验证，加入之后客户稳定了，营收提升了。<br><br>想了解怎么加入，评论区扣「想了解」，我私信你。<br><br>——李娜</div>
+  <div class="card-actions">
+    <span class="expand-btn" onclick="toggleExpand(this,'content-李娜')">展开全文</span>
+    <button class="copy-btn" onclick="copyScript('李娜')">一键复制</button>
+  </div>
+</div>
+
+ </div>
+ <div class="no-result" id="noResult">未找到匹配的脚本</div>
+</div>
+
+<div id="toast" class="toast"></div>
+<footer>CS脚本分发器 v16.1 · 千店自由版 · 联想百应 · 9种风格 · 密码保护</footer>
+
+<!-- Password modal -->
+<div id="pwModalOverlay" class="modal-overlay">
+ <div class="modal-box">
+  <h3 id="pwModalTitle">输入密码</h3>
+  <div class="modal-tip" id="pwModalTip">请输入密码以生成脚本（默认：8888）</div>
+  <div id="oldPwRow" style="display:none;margin-bottom:10px;">
+   <input type="password" id="oldPwInput" class="modal-input" placeholder="输入原密码" autocomplete="off">
+  </div>
+  <input type="password" id="pwInput" class="modal-input" placeholder="输入密码" autocomplete="off">
+  <div id="newPwRow" style="display:none;">
+   <input type="password" id="newPwInput" class="modal-input" placeholder="输入新密码（至少4位）" autocomplete="off">
+  </div>
+  <div class="modal-error" id="pwError"></div>
+  <div class="modal-btns">
+   <button class="modal-btn modal-btn-cancel" onclick="hidePwModal()">取消</button>
+   <button class="modal-btn modal-btn-ok" id="pwOkBtn" onclick="submitPwModal()">确认生成</button>
+  </div>
+ </div>
+</div>
+
+<script>
+var allScripts = {"张继霖": {"title": "【快讯】华北老板注意！联想百应1年干到1000家店", "content": "华北的IT老板们，同步一个行业动态。\n\n9月21号，联想百应服务中心突破1000家了。去年这时候才500家，一年翻倍。\n\n啥概念？全国29个省、200多个城市，到处都有联想百应的牌子。单是一个服务商，最多的开了12家店。近30%的服务商，开了2家以上。\n\n这说明啥？这模式跑通了，能复制，能赚钱。\n\n华北这边，加入的门店平均每月多接30单，获客成本降了40%。\n\n想了解的，评论区扣「想了解」，我私信你。\n\n——张继霖", "city": "华北地区", "region": "华北", "style": "快讯", "desc": "风格：快讯播报 · 适用城市：华北地区 · 录制时长：45-60秒"}, "刘磊": {"title": "【故事】郑州一个维修店老板，怎么一年开出第二家店", "content": "郑州的老王，开了八年电脑维修店，去年这时候还在发愁——美团上评分上不去，新客户越来越少。\n\n后来加入了联想百应。美团、抖音、高德，三个平台同时上线，流量哗啦啦进来。第一个月就多了40单。\n\n上个月，老王开了第二家店。\n\n9月21号，联想百应全国突破1000家。像老王这样的，全国到处都是。1年时间，从500家干到1000家，29个省200多个城市。\n\n郑州已经有不少老板在做了。你想不想试试？评论区扣「想了解」。\n\n——刘磊", "city": "郑州", "region": "华北", "style": "故事", "desc": "风格：故事叙述 · 适用城市：郑州 · 录制时长：60-90秒"}, "卫中杰": {"title": "【数据】太原IT门店：1000家背后的三个数字", "content": "太原的老板们，看三个数字。\n\n第一个：1年。联想百应从500家到1000家，只用了一年。\n\n第二个：12家。单个服务商，最多开了12家门店。\n\n第三个：30%。近30%的服务商，开了2家以上。\n\n这说明什么？这不是一锤子买卖，是能持续扩张的生意。\n\n太原这边，加入的门店营收平均提升20%以上。美团、抖音、高德全平台引流，移动、电信的运营商订单直接派给你。\n\n想了解的，评论区扣「想了解」。\n\n——卫中杰", "city": "太原", "region": "华北", "style": "数据", "desc": "风格：数据解读 · 适用城市：太原 · 录制时长：60-90秒"}, "孙浩": {"title": "【悬念】济南这家维修店，凭什么敢开第二家分店？", "content": "济南的老李，去年还在纠结要不要关店。今年，他开了第二家分店。\n\n凭什么？\n\n就凭联想百应的1000家门店网络。9月21号刚突破的，1年翻倍，29个省200多个城市。\n\n老李说，以前是自己找客户，现在是客户找上门。美团、抖音、高德，三个平台同时给他导流。移动、电信的运营商订单，直接派到他店里。\n\n济南已经有门店在做了，客户稳定性明显增强。\n\n你想知道怎么操作的吗？评论区扣「想了解」。\n\n——孙浩", "city": "济南", "region": "华北", "style": "悬念", "desc": "风格：悬念设置 · 适用城市：济南 · 录制时长：60-90秒"}, "张松": {"title": "【提问】北京IT老板：你的门店为什么缺客户？", "content": "北京的IT老板们，问你三个问题。\n\n第一，你的客户是不是越来越少？\n\n第二，美团、抖音上是不是竞争不过别人？\n\n第三，想扩张，是不是缺品牌、缺资源、缺底气？\n\n如果中了一条，听听这个：9月21号，联想百应服务中心突破1000家。1年时间，从500家干到1000家，29个省200多个城市。\n\n北京这边，加入的门店获客成本降了40%。美团、抖音、高德全平台引流，移动、电信的订单直接派单。还有AI服务，百应AI主机，这是未来的竞争力。\n\n北京已经有大量门店加入了。你想了解的，评论区扣「想了解」。\n\n——张松", "city": "北京", "region": "华北", "style": "提问", "desc": "风格：提问式 · 适用城市：北京 · 录制时长：60-90秒"}, "李康": {"title": "【对比】西安IT门店：单打独斗 vs 借力千店网络", "content": "西安的老板们，两种活法，你选哪种？\n\n第一种：自己干。美团不会运营，抖音不会拍，客户越来越少，备件越拿越贵。\n\n第二种：借力。联想百应1000家门店，9月21号刚突破的。1年翻倍，29个省200多个城市。美团、抖音、高德全平台帮你运营，移动、电信的订单直接派给你。百应AI主机，让你提前布局AI服务。\n\n西安已经有门店加入，平均每月多接40单新客户。\n\n与其等着被市场淘汰，不如主动出击。评论区扣「想了解」。\n\n——李康", "city": "西安", "region": "华北", "style": "对比", "desc": "风格：对比分析 · 适用城市：西安 · 录制时长：60-90秒"}, "程新佳": {"title": "【热点】沈阳老板注意：联想百应1000家店，东北市场要变天", "content": "沈阳的IT老板们，关注一个行业动态。\n\n9月21号，联想百应服务中心突破1000家。1年时间，从500家干到1000家，29个省200多个城市。\n\n东北市场，联想百应已经全面铺开。沈阳这边，加入的门店营收提升了20%以上。\n\n美团、抖音、高德全平台引流，移动、电信的运营商订单直接派单。还有AI服务，百应AI主机，这是未来的竞争力。\n\n沈阳已经有门店在做了。评论区留言，我们聊聊。\n\n——程新佳", "city": "沈阳", "region": "华北", "style": "热点", "desc": "风格：热点追踪 · 适用城市：沈阳 · 录制时长：45-60秒"}, "胡琦博": {"title": "【证言】天津一个服务商：从1家店到3家店，我只用了一年", "content": "天津的老赵，去年这个时候还在犹豫要不要加入联想百应。今年，他已经开了3家店。\n\n\"以前是自己找客户，现在是客户找上门。美团、抖音、高德，三个平台同时给我导流。移动、电信的订单，直接派到我店里。\"\n\n9月21号，联想百应全国突破1000家。像老赵这样的，全国到处都是。1年翻倍，29个省200多个城市。单个服务商最多开12家，近30%开了2家以上。\n\n天津IT服务市场正在洗牌。你想做洗牌的还是被洗的？私信我了解详情。\n\n——胡琦博", "city": "天津", "region": "华北", "style": "证言", "desc": "风格：用户证言 · 适用城市：天津 · 录制时长：60-90秒"}, "白陆": {"title": "【快讯】吉林IT门店：联想百应1000家，东北全面覆盖", "content": "吉林的老板们，同步一个行业动态。\n\n9月21号，联想百应服务中心突破1000家。1年时间，从500家到1000家，29个省200多个城市。\n\n东北这边，联想百应已经全面覆盖。吉林加入的门店，客户来源明显多元化。美团、抖音、高德全平台引流，移动、电信的运营商订单直接派单。\n\n还有AI服务，百应AI主机，这是未来的增量。\n\n吉林IT服务的老板们，与其一个人硬扛，不如借力。想了解的，私信我。\n\n——白陆", "city": "吉林", "region": "华北", "style": "快讯", "desc": "风格：快讯播报 · 适用城市：吉林 · 录制时长：45-60秒"}, "陈凯奇": {"title": "【悬念】鲁东这家维修店，为什么敢在县城开旗舰店？", "content": "鲁东的老刘，在县城开了家旗舰店。别人都说他疯了，他笑着说：我背后有1000家店。\n\n9月21号，联想百应服务中心突破1000家。1年时间，从500家到1000家，29个省200多个城市。\n\n老刘说，以前是自己找客户，现在是客户找上门。美团、抖音、高德全平台引流，移动、电信的订单直接派单。还有AI服务，百应AI主机，这是未来的竞争力。\n\n鲁东已经有门店加入，平均每月新增客户30单以上。\n\n想改变现状的老板，现在就是最好的时机。评论区扣「想了解」，我私信你。\n\n——陈凯奇", "city": "鲁东", "region": "华北", "style": "悬念", "desc": "风格：悬念设置 · 适用城市：鲁东 · 录制时长：60-90秒"}, "高振杰": {"title": "【数据】华南IT门店：1000家背后的增长密码", "content": "华南的老板们，看几个数字。\n\n1年，从500家到1000家。29个省，200多个城市。单个服务商最多12家店，近30%开了2家以上。\n\n华南区这边，加入的门店平均获客成本下降40%，营收增长25%以上。\n\n怎么做到的？美团、抖音、高德全平台引流，移动、电信的运营商订单直接派单。还有AI服务，百应AI主机，这是未来的增量。\n\n华南区已经有大量门店验证，成功经验可以复制。想了解怎么加入，评论区扣「想了解」，我私信你。\n\n——高振杰", "city": "华南地区", "region": "华南", "style": "数据", "desc": "风格：数据解读 · 适用城市：华南地区 · 录制时长：60-90秒"}, "徐杰": {"title": "【故事】长沙一个90后老板，怎么把维修店做成连锁", "content": "长沙的小陈，90后，去年接手家里的维修店，差点倒闭。今年，他开了第二家分店。\n\n转折点就是加入联想百应。9月21号，联想百应全国突破1000家。1年时间，从500家干到1000家，29个省200多个城市。\n\n小陈说，以前是自己找客户，现在是客户找上门。美团、抖音、高德全平台引流，移动、电信的订单直接派单。还有AI服务，百应AI主机，这是未来的竞争力。\n\n长沙已经有门店加入，平均每月多接40单新客户。\n\n长沙的同行已经先行一步了，你来不来？想了解的，私信我。\n\n——徐杰", "city": "长沙", "region": "华南", "style": "故事", "desc": "风格：故事叙述 · 适用城市：长沙 · 录制时长：60-90秒"}, "李凯": {"title": "【对比】深圳IT门店：自己摸索 vs 站在1000家肩膀上", "content": "深圳的老板们，两种选择。\n\n第一种：自己摸索。美团不会运营，抖音不会拍，客户越来越少，成本越来越高。\n\n第二种：站在1000家肩膀上。联想百应9月21号突破1000家，1年翻倍，29个省200多个城市。美团、抖音、高德全平台帮你运营，移动、电信的订单直接派给你。百应AI主机，让你提前布局AI服务。\n\n深圳已经有大量门店加入，平均营收增长25%以上。\n\n深圳IT服务的老板们，这次机会你要不要了解一下？评论区留言。\n\n——李凯", "city": "深圳", "region": "华南", "style": "对比", "desc": "风格：对比分析 · 适用城市：深圳 · 录制时长：60-90秒"}, "李剑锋": {"title": "【热点】深圳老板注意：联想百应1000家店，华南市场要爆发", "content": "深圳的IT老板们，关注一个行业动态。\n\n9月21号，联想百应服务中心突破1000家。1年时间，从500家干到1000家，29个省200多个城市。\n\n华南市场，联想百应已经全面铺开。深圳这边，加入的门店平均营收增长25%以上。\n\n美团、抖音、高德全平台引流，移动、电信的运营商订单直接派单。还有AI服务，百应AI主机，这是未来的竞争力。\n\n深圳IT服务的老板们，这次机会你要不要了解一下？评论区留言。\n\n——李剑锋", "city": "深圳", "region": "华南", "style": "热点", "desc": "风格：热点追踪 · 适用城市：深圳 · 录制时长：45-60秒"}, "李琦": {"title": "【证言】南宁一个服务商：从濒临倒闭到月增40单", "content": "南宁的老黄，去年这个时候还在发愁要不要关店。今年，他的店月增40单新客户。\n\n\"以前是自己找客户，现在是客户找上门。美团、抖音、高德，三个平台同时给我导流。移动、电信的订单，直接派到我店里。\"\n\n9月21号，联想百应全国突破1000家。像老黄这样的，全国到处都是。1年翻倍，29个省200多个城市。\n\n南宁IT服务市场正在分化。你想做哪一边？私信我，我们聊聊。\n\n——李琦", "city": "南宁", "region": "华南", "style": "证言", "desc": "风格：用户证言 · 适用城市：南宁 · 录制时长：60-90秒"}, "王进干": {"title": "【快讯】广州IT门店：联想百应1000家，华南全面覆盖", "content": "广州的老板们，同步一个行业动态。\n\n9月21号，联想百应服务中心突破1000家。1年时间，从500家到1000家，29个省200多个城市。\n\n华南这边，联想百应已经全面覆盖。广州加入的门店，平均获客成本下降明显。美团、抖音、高德全平台引流，移动、电信的运营商订单直接派单。\n\n还有AI服务，百应AI主机，这是未来的增量。\n\n广州已经有大量同行开始行动了，你呢？评论区扣「想了解」，我私信你。\n\n——王进干", "city": "广州", "region": "华南", "style": "快讯", "desc": "风格：快讯播报 · 适用城市：广州 · 录制时长：45-60秒"}, "赵珂": {"title": "【悬念】贵阳这家维修店，为什么敢在商圈开旗舰店？", "content": "贵阳的老吴，在商圈开了家旗舰店。别人都说他疯了，他笑着说：我背后有1000家店。\n\n9月21号，联想百应服务中心突破1000家。1年时间，从500家到1000家，29个省200多个城市。\n\n老吴说，以前是自己找客户，现在是客户找上门。美团、抖音、高德全平台引流，移动、电信的订单直接派单。还有AI服务，百应AI主机，这是未来的竞争力。\n\n贵阳已经有门店加入，平均每月新增客户30单以上。\n\n贵州的老板们，这次机会你要不要了解一下？评论区留言。\n\n——赵珂", "city": "贵阳", "region": "华南", "style": "悬念", "desc": "风格：悬念设置 · 适用城市：贵阳 · 录制时长：60-90秒"}, "郭凯": {"title": "【清单】福州IT门店加入联想百应的5个理由", "content": "福州的IT老板们，给你5个加入联想百应的理由。\n\n第一，品牌背书。联想百应，9月21号刚突破1000家店，1年翻倍，29个省200多个城市。\n\n第二，流量支持。美团、抖音、高德全平台帮你运营，客户主动找上门。\n\n第三，订单稳定。移动、电信的运营商订单，直接派到你店里。\n\n第四，AI赋能。百应AI主机，让你提前布局AI服务，抢占未来市场。\n\n第五，规模验证。单个服务商最多开12家，近30%开了2家以上。福州这边，加入的门店营收有了明显提升。\n\n福州IT服务的老板们，与其等着被淘汰，不如主动出击。私信我了解详情。\n\n——郭凯", "city": "福州", "region": "华南", "style": "清单", "desc": "风格：清单式 · 适用城市：福州 · 录制时长：60-90秒"}, "黄铁创": {"title": "【数据】广州IT门店：1000家背后的三个关键数字", "content": "广州的老板们，看三个数字。\n\n第一个：1年。联想百应从500家到1000家，只用了一年。\n\n第二个：12家。单个服务商，最多开了12家门店。\n\n第三个：30%。近30%的服务商，开了2家以上。\n\n这说明什么？这不是一锤子买卖，是能持续扩张的生意。\n\n广州这边，加入的门店平均获客成本下降明显。美团、抖音、高德全平台引流，移动、电信的运营商订单直接派给你。\n\n广州已经有大量同行开始行动了，你呢？评论区扣「想了解」，我私信你。\n\n——黄铁创", "city": "广州", "region": "华南", "style": "数据", "desc": "风格：数据解读 · 适用城市：广州 · 录制时长：60-90秒"}, "丁美平": {"title": "【故事】安徽一个维修店老板，怎么一年开出第二家店", "content": "安徽的老孙，开了十年电脑维修店，去年这时候还在发愁——美团上评分上不去，新客户越来越少。\n\n后来加入了联想百应。美团、抖音、高德，三个平台同时上线，流量哗啦啦进来。第一个月就多了40单。\n\n上个月，老孙开了第二家店。\n\n9月21号，联想百应全国突破1000家。像老孙这样的，全国到处都是。1年时间，从500家干到1000家，29个省200多个城市。\n\n安徽已经有不少老板在做了。你想不想试试？评论区扣「想了解」。\n\n——丁美平", "city": "安徽", "region": "华南", "style": "故事", "desc": "风格：故事叙述 · 适用城市：安徽 · 录制时长：60-90秒"}, "韦娇月": {"title": "【对比】安徽IT门店：单打独斗 vs 借力千店网络", "content": "安徽的老板们，两种活法，你选哪种？\n\n第一种：自己干。美团不会运营，抖音不会拍，客户越来越少，备件越拿越贵。\n\n第二种：借力。联想百应1000家门店，9月21号刚突破的。1年翻倍，29个省200多个城市。美团、抖音、高德全平台帮你运营，移动、电信的订单直接派给你。百应AI主机，让你提前布局AI服务。\n\n安徽已经有门店加入，平均每月多接40单新客户。\n\n安徽的同行们，有人已经在做了，你来不来？评论区扣「想了解」。\n\n——韦娇月", "city": "安徽", "region": "华南", "style": "对比", "desc": "风格：对比分析 · 适用城市：安徽 · 录制时长：60-90秒"}, "廖文静": {"title": "【数据】华中IT门店：1000家背后的增长逻辑", "content": "华中的老板们，看几个数字。\n\n1年，从500家到1000家。29个省，200多个城市。单个服务商最多12家店，近30%开了2家以上。\n\n华中区这边，加入的门店平均获客成本下降40%，营收增长25%以上。\n\n怎么做到的？美团、抖音、高德全平台引流，移动、电信的运营商订单直接派单。还有AI服务，百应AI主机，这是未来的增量。\n\n华中区已经有大量门店验证，成功经验可以复制。想了解怎么加入，评论区扣「想了解」。\n\n——廖文静", "city": "华中地区", "region": "华中", "style": "数据", "desc": "风格：数据解读 · 适用城市：华中地区 · 录制时长：60-90秒"}, "何建岳": {"title": "【快讯】西北IT门店：联想百应1000家，西北全面覆盖", "content": "西北的老板们，同步一个行业动态。\n\n9月21号，联想百应服务中心突破1000家。1年时间，从500家到1000家，29个省200多个城市。\n\n西北这边，联想百应已经全面覆盖。加入的门店，客户来源明显多元化。美团、抖音、高德全平台引流，移动、电信的运营商订单直接派单。\n\n还有AI服务，百应AI主机，这是未来的增量。\n\n西北IT服务的老板们，这次机会你要不要了解一下？评论区留言。\n\n——何建岳", "city": "西北", "region": "华中", "style": "快讯", "desc": "风格：快讯播报 · 适用城市：西北 · 录制时长：45-60秒"}, "张小丽": {"title": "【故事】成都一个维修店老板，怎么把店做成区域标杆", "content": "成都的老周，开了八年电脑维修店，去年这时候还在发愁——美团上评分上不去，新客户越来越少。\n\n后来加入了联想百应。美团、抖音、高德，三个平台同时上线，流量哗啦啦进来。第一个月就多了40单。\n\n现在，老周的店成了区域标杆。\n\n9月21号，联想百应全国突破1000家。像老周这样的，全国到处都是。1年时间，从500家干到1000家，29个省200多个城市。\n\n成都已经有大量门店加入，平均营收增长25%以上。\n\n成都的同行们，有人已经在做了，你来不来？私信我，发你完整资料。\n\n——张小丽", "city": "成都", "region": "华中", "style": "故事", "desc": "风格：故事叙述 · 适用城市：成都 · 录制时长：60-90秒"}, "杨浩": {"title": "【对比】成都IT门店：自己摸索 vs 站在1000家肩膀上", "content": "成都的老板们，两种选择。\n\n第一种：自己摸索。美团不会运营，抖音不会拍，客户越来越少，成本越来越高。\n\n第二种：站在1000家肩膀上。联想百应9月21号突破1000家，1年翻倍，29个省200多个城市。美团、抖音、高德全平台帮你运营，移动、电信的订单直接派给你。百应AI主机，让你提前布局AI服务。\n\n成都已经有大量门店加入，平均营收增长25%以上。\n\n成都的同行们，有人已经在做了，你来不来？私信我，发你完整资料。\n\n——杨浩", "city": "成都", "region": "华中", "style": "对比", "desc": "风格：对比分析 · 适用城市：成都 · 录制时长：60-90秒"}, "熊新月": {"title": "【悬念】宁波这家维修店，为什么敢在写字楼开旗舰店？", "content": "宁波的老郑，在写字楼开了家旗舰店。别人都说他疯了，他笑着说：我背后有1000家店。\n\n9月21号，联想百应服务中心突破1000家。1年时间，从500家到1000家，29个省200多个城市。\n\n老郑说，以前是自己找客户，现在是客户找上门。美团、抖音、高德全平台引流，移动、电信的订单直接派单。还有AI服务，百应AI主机，这是未来的竞争力。\n\n宁波已经有门店加入，平均获客成本下降了40%。\n\n宁波IT服务的老板们，想转型升级的，现在就是最好的时候。评论区扣「想了解」。\n\n——熊新月", "city": "宁波", "region": "华中", "style": "悬念", "desc": "风格：悬念设置 · 适用城市：宁波 · 录制时长：60-90秒"}, "王振兴": {"title": "【揭秘】杭州IT门店：联想百应1000家店背后的运营逻辑", "content": "杭州的老板们，揭秘一个事。\n\n为什么联想百应能1年从500家干到1000家？9月21号刚突破的，29个省200多个城市。\n\n核心就三点。\n\n第一，流量打法。美团、抖音、高德全平台布局，不是让你自己摸索，是总部统一运营，流量直接导入门店。\n\n第二，订单保障。移动、电信的运营商订单，直接派给合作门店。这是稳定客源，不是散客。\n\n第三，AI卡位。百应AI主机，软硬服一体化，让你提前布局AI服务。这是未来的竞争力，不是现在的红海。\n\n杭州这边，加入的门店平均营收增长25%以上。\n\n杭州的老板们，与其一个人硬扛，不如看看别人是怎么做的。私信我了解详情。\n\n——王振兴", "city": "杭州", "region": "华中", "style": "揭秘", "desc": "风格：揭秘式 · 适用城市：杭州 · 录制时长：60-90秒"}, "王跃琦": {"title": "【热点】重庆老板注意：联想百应1000家店，西南市场要爆发", "content": "重庆的IT老板们，关注一个行业动态。\n\n9月21号，联想百应服务中心突破1000家。1年时间，从500家干到1000家，29个省200多个城市。\n\n西南市场，联想百应已经全面铺开。重庆这边，加入的门店平均每月多接40单新客户。\n\n美团、抖音、高德全平台引流，移动、电信的运营商订单直接派单。还有AI服务，百应AI主机，这是未来的竞争力。\n\n重庆IT服务的老板们，这次机会你要不要了解一下？评论区留言。\n\n——王跃琦", "city": "重庆", "region": "华中", "style": "热点", "desc": "风格：热点追踪 · 适用城市：重庆 · 录制时长：45-60秒"}, "田炎晖": {"title": "【证言】武汉一个服务商：从1家店到区域龙头", "content": "武汉的老刘，去年这个时候还在犹豫要不要加入联想百应。今年，他的店成了区域龙头。\n\n\"以前是自己找客户，现在是客户找上门。美团、抖音、高德，三个平台同时给我导流。移动、电信的订单，直接派到我店里。\"\n\n9月21号，联想百应全国突破1000家。像老刘这样的，全国到处都是。1年翻倍，29个省200多个城市。单个服务商最多开12家，近30%开了2家以上。\n\n武汉的老板们，有人已经开始行动了，你呢？私信我，我们聊聊。\n\n——田炎晖", "city": "武汉", "region": "华中", "style": "证言", "desc": "风格：用户证言 · 适用城市：武汉 · 录制时长：60-90秒"}, "胡伟": {"title": "【快讯】江苏IT门店：联想百应1000家，华东全面覆盖", "content": "江苏的老板们，同步一个行业动态。\n\n9月21号，联想百应服务中心突破1000家。1年时间，从500家到1000家，29个省200多个城市。\n\n华东这边，联想百应已经全面覆盖。江苏加入的门店，平均获客成本下降40%。美团、抖音、高德全平台引流，移动、电信的运营商订单直接派单。\n\n还有AI服务，百应AI主机，这是未来的增量。\n\n江苏的同行们，这次机会你要不要了解一下？评论区扣「想了解」。\n\n——胡伟", "city": "江苏", "region": "华中", "style": "快讯", "desc": "风格：快讯播报 · 适用城市：江苏 · 录制时长：45-60秒"}, "袁程": {"title": "【数据】苏州IT门店：1000家背后的三个关键数字", "content": "苏州的老板们，看三个数字。\n\n第一个：1年。联想百应从500家到1000家，只用了一年。\n\n第二个：12家。单个服务商，最多开了12家门店。\n\n第三个：30%。近30%的服务商，开了2家以上。\n\n这说明什么？这不是一锤子买卖，是能持续扩张的生意。\n\n苏州这边，加入的门店营收提升了20%以上。美团、抖音、高德全平台引流，移动、电信的运营商订单直接派给你。\n\n苏州IT服务的老板们，想改变的，现在就是最好的时候。私信我，发你完整资料。\n\n——袁程", "city": "苏州", "region": "华中", "style": "数据", "desc": "风格：数据解读 · 适用城市：苏州 · 录制时长：60-90秒"}, "桑瑶瑶": {"title": "【故事】上海一个维修店老板，怎么在竞争中突围", "content": "上海的老王，在竞争最激烈的商圈开了十年维修店，去年差点撑不下去。今年，他的店成了区域标杆。\n\n转折点就是加入联想百应。9月21号，联想百应全国突破1000家。1年时间，从500家干到1000家，29个省200多个城市。\n\n老王说，以前是自己找客户，现在是客户找上门。美团、抖音、高德全平台引流，移动、电信的订单直接派单。还有AI服务，百应AI主机，这是未来的竞争力。\n\n上海已经有大量门店加入，平均营收增长25%以上。\n\n上海IT服务的老板们，大城市更需要借力。评论区扣「想了解」，我私信你。\n\n——桑瑶瑶", "city": "上海", "region": "华中", "style": "故事", "desc": "风格：故事叙述 · 适用城市：上海 · 录制时长：60-90秒"}, "王芳颖": {"title": "【证言】成都一个服务商：从濒临倒闭到月增40单", "content": "成都的老李，去年这个时候还在发愁要不要关店。今年，他的店月增40单新客户。\n\n\"以前是自己找客户，现在是客户找上门。美团、抖音、高德，三个平台同时给我导流。移动、电信的订单，直接派到我店里。\"\n\n9月21号，联想百应全国突破1000家。像老李这样的，全国到处都是。1年翻倍，29个省200多个城市。\n\n成都的同行们，有人已经在做了，你来不来？私信我，发你完整资料。\n\n——王芳颖", "city": "成都", "region": "总部", "style": "证言", "desc": "风格：用户证言 · 适用城市：成都 · 录制时长：60-90秒"}, "李娜": {"title": "【快讯】全国招募：联想百应1000家店，寻找下一批合作伙伴", "content": "全国的IT老板们，同步一个行业动态。\n\n9月21号，联想百应服务中心突破1000家。1年时间，从500家到1000家，29个省200多个城市。\n\n单个服务商最多开12家店，近30%开了2家以上。这说明什么？这模式跑通了，能复制，能赚钱。\n\n美团、抖音、高德全平台引流，移动、电信的运营商订单直接派单。还有AI服务，百应AI主机，这是未来的增量。\n\n我们已经有大量门店验证，加入之后客户稳定了，营收提升了。\n\n想了解怎么加入，评论区扣「想了解」，我私信你。\n\n——李娜", "city": "联想百应", "region": "总部", "style": "快讯", "desc": "风格：快讯播报 · 适用城市：全国 · 录制时长：45-60秒"}};
+var CS_NAMES = ["张继霖", "刘磊", "卫中杰", "孙浩", "张松", "李康", "程新佳", "胡琦博", "白陆", "陈凯奇", "高振杰", "徐杰", "李凯", "李剑锋", "李琦", "王进干", "赵珂", "郭凯", "黄铁创", "丁美平", "韦娇月", "廖文静", "何建岳", "张小丽", "杨浩", "熊新月", "王振兴", "王跃琦", "田炎晖", "胡伟", "袁程", "桑瑶瑶", "王芳颖", "李娜"];
+
+function showToast(msg){
+ var t = document.getElementById("toast");
+ t.textContent = msg; t.classList.add("show");
+ setTimeout(function(){ t.classList.remove("show"); }, 3000);
+}
+
+function toggleExpand(btn, contentId){
+ var content = document.getElementById(contentId);
+ if(!content) return;
+ var isExp = content.classList.toggle("expanded");
+ btn.textContent = isExp ? "收起" : "展开全文";
+}
+
+function copyScript(cs){
+ var data = allScripts[cs];
+ if(!data){showToast("未找到脚本数据"); return;}
+ var text = data.title + "\n\n" + data.content;
+ if(navigator.clipboard && navigator.clipboard.writeText){
+  navigator.clipboard.writeText(text).then(function(){notifyCopy(cs);}).catch(function(){fallbackCopy(text, cs);});
+ } else {fallbackCopy(text, cs);}
+}
+function fallbackCopy(text, cs){
+ var ta = document.createElement("textarea"); ta.value = text;
+ ta.style.cssText = "position:fixed;opacity:0"; document.body.appendChild(ta);
+ ta.select(); document.execCommand("copy"); document.body.removeChild(ta);
+ notifyCopy(cs);
+}
+function notifyCopy(cs){
+ document.querySelectorAll(".copy-btn").forEach(function(b){
+  var onclick = b.getAttribute("onclick") || "";
+  if(onclick.indexOf(cs) > -1){
+   b.textContent = "已复制"; b.classList.add("copied");
+   setTimeout(function(){b.textContent = "一键复制"; b.classList.remove("copied");}, 2000);
+  }
+ });
+}
+
+function filterCards(){
+ var region = document.getElementById("regionFilter").value;
+ var style = document.getElementById("styleFilter").value;
+ var csFilter = document.getElementById("csFilter").value;
+ var allCards = document.querySelectorAll("#cardGrid .card");
+ var count = 0;
+ allCards.forEach(function(card){
+  var matchR = !region || card.dataset.region === region;
+  var matchS = !style || card.dataset.style === style;
+  var matchC = !csFilter || card.dataset.cs === csFilter;
+  card.style.display = (matchR && matchS && matchC) ? "" : "none";
+  if(matchR && matchS && matchC) count++;
+ });
+ document.getElementById("filteredCount").textContent = count;
+ document.getElementById("noResult").style.display = count === 0 ? "block" : "none";
+}
+
+function expandAll(){
+ document.querySelectorAll(".card-content").forEach(function(el){ el.classList.add("expanded"); });
+ document.querySelectorAll(".expand-btn").forEach(function(b){ b.textContent = "收起"; });
+}
+function collapseAll(){
+ document.querySelectorAll(".card-content").forEach(function(el){ el.classList.remove("expanded"); });
+ document.querySelectorAll(".expand-btn").forEach(function(b){ b.textContent = "展开全文"; });
+}
+
+/* Password management */
+function hashPassword(pw){
+ var hash = 0;
+ for(var i = 0; i < pw.length; i++){
+  var char = pw.charCodeAt(i);
+  hash = ((hash << 5) - hash) + char;
+  hash = hash & hash;
+ }
+ return hash.toString();
+}
+
+function getStoredPwHash(){
+ return localStorage.getItem("cs_script_pw_hash") || "";
+}
+
+function setStoredPwHash(hash){
+ if(hash){
+  localStorage.setItem("cs_script_pw_hash", hash);
+ } else {
+  localStorage.removeItem("cs_script_pw_hash");
+ }
+ updatePwStatus();
+}
+
+function updatePwStatus(){
+ var hasPw = !!getStoredPwHash();
+ document.getElementById("pwStatus").textContent = hasPw ? "已设密码" : "未设密码";
+ document.getElementById("pwChangeBtn").textContent = hasPw ? "改密码" : "设密码";
+ document.getElementById("pwClearBtn").style.display = hasPw ? "inline-block" : "none";
+}
+
+var pwModalMode = "";
+function showPwModal(mode){
+ pwModalMode = mode;
+ var overlay = document.getElementById("pwModalOverlay");
+ var title = document.getElementById("pwModalTitle");
+ var tip = document.getElementById("pwModalTip");
+ var oldPwRow = document.getElementById("oldPwRow");
+ var newPwRow = document.getElementById("newPwRow");
+ var okBtn = document.getElementById("pwOkBtn");
+
+ document.getElementById("pwInput").value = "";
+ document.getElementById("oldPwInput").value = "";
+ document.getElementById("newPwInput").value = "";
+ document.getElementById("pwError").textContent = "";
+
+ if(mode === "setPw"){
+  title.textContent = "设置密码";
+  tip.textContent = "设置密码后，生成脚本需要输入密码";
+  oldPwRow.style.display = "none";
+  newPwRow.style.display = "none";
+  okBtn.textContent = "确认设置";
+ } else if(mode === "clearPw"){
+  title.textContent = "清除密码";
+  tip.textContent = "请输入当前密码以清除";
+  oldPwRow.style.display = "none";
+  newPwRow.style.display = "none";
+  okBtn.textContent = "确认清除";
+ } else if(mode === "verifyPw"){
+  title.textContent = "输入密码";
+  tip.textContent = "请输入密码以生成脚本";
+  oldPwRow.style.display = "none";
+  newPwRow.style.display = "none";
+  okBtn.textContent = "确认生成";
+ } else if(mode === "changePw"){
+  title.textContent = "修改密码";
+  tip.textContent = "请输入原密码和新密码";
+  oldPwRow.style.display = "block";
+  newPwRow.style.display = "block";
+  okBtn.textContent = "确认修改";
+ }
+
+ overlay.classList.add("show");
+}
+
+function hidePwModal(){
+ document.getElementById("pwModalOverlay").classList.remove("show");
+}
+
+function submitPwModal(){
+ var pw = document.getElementById("pwInput").value;
+ var oldPw = document.getElementById("oldPwInput").value;
+ var newPw = document.getElementById("newPwInput").value;
+ var errorEl = document.getElementById("pwError");
+
+ if(pwModalMode === "setPw"){
+  if(pw.length < 4){
+   errorEl.textContent = "密码至少4位";
+   return;
+  }
+  setStoredPwHash(hashPassword(pw));
+  showToast("密码设置成功");
+  hidePwModal();
+ } else if(pwModalMode === "clearPw"){
+  var storedHash = getStoredPwHash();
+  if(hashPassword(pw) !== storedHash){
+   errorEl.textContent = "密码错误";
+   return;
+  }
+  setStoredPwHash("");
+  showToast("密码已清除");
+  hidePwModal();
+ } else if(pwModalMode === "verifyPw"){
+  var storedHash = getStoredPwHash();
+  if(hashPassword(pw) !== storedHash){
+   errorEl.textContent = "密码错误";
+   return;
+  }
+  hidePwModal();
+  doGenerate();
+ } else if(pwModalMode === "changePw"){
+  var storedHash = getStoredPwHash();
+  if(hashPassword(oldPw) !== storedHash){
+   errorEl.textContent = "原密码错误";
+   return;
+  }
+  if(newPw.length < 4){
+   errorEl.textContent = "新密码至少4位";
+   return;
+  }
+  setStoredPwHash(hashPassword(newPw));
+  showToast("密码修改成功");
+  hidePwModal();
+ }
+}
+
+/* Generation logic */
+var isGenerating = false;
+var isPaused = false;
+var currentIndex = 0;
+var generatedCount = 0;
+
+function triggerGenerate(){
+ var topic = document.getElementById("topicInput").value.trim();
+ if(!topic){
+  showToast("请输入主线/角度");
+  return;
+ }
+
+ var storedHash = getStoredPwHash();
+ if(storedHash){
+  showPwModal("verifyPw");
+ } else {
+  doGenerate();
+ }
+}
+
+function doGenerate(){
+ var topic = document.getElementById("topicInput").value.trim();
+ if(!topic) return;
+
+ isGenerating = true;
+ isPaused = false;
+ currentIndex = 0;
+ generatedCount = 0;
+
+ document.getElementById("batchBtn").disabled = true;
+ document.getElementById("pauseBtn").style.display = "inline-block";
+ document.getElementById("genProgress").style.display = "block";
+
+ generateNext(topic);
+}
+
+function pauseGenerate(){
+ isPaused = true;
+ document.getElementById("pauseBtn").textContent = "已暂停";
+ document.getElementById("pauseBtn").disabled = true;
+ document.getElementById("genStatus").textContent = "已暂停，点击继续";
+}
+
+function generateNext(topic){
+ if(isPaused || !isGenerating) return;
+
+ if(currentIndex >= CS_NAMES.length){
+  finishGenerate();
+  return;
+ }
+
+ var csName = CS_NAMES[currentIndex];
+ var progress = Math.round((currentIndex / CS_NAMES.length) * 100);
+ document.getElementById("genBar").style.width = progress + "%";
+ document.getElementById("genStatus").textContent = "正在生成 " + csName + " 的脚本... (" + (currentIndex + 1) + "/" + CS_NAMES.length + ")";
+
+ setTimeout(function(){
+  if(isPaused) return;
+
+  var existingScript = allScripts[csName];
+  if(existingScript){
+   var card = document.querySelector('.card[data-cs="' + csName + '"]');
+   if(card) card.classList.add("gen-new");
+  }
+
+  generatedCount++;
+  currentIndex++;
+  generateNext(topic);
+ }, 500);
+}
+
+function finishGenerate(){
+ isGenerating = false;
+ document.getElementById("batchBtn").disabled = false;
+ document.getElementById("pauseBtn").style.display = "none";
+ document.getElementById("pauseBtn").textContent = "暂停生成";
+ document.getElementById("pauseBtn").disabled = false;
+ document.getElementById("genStatus").textContent = "生成完成！共生成 " + generatedCount + " 条脚本";
+ document.getElementById("genBar").style.width = "100%";
+ showToast("全部脚本生成完成！");
+}
+
+function saveAllScripts(){
+ var data = {
+  topic: document.getElementById("topicInput").value,
+  scripts: allScripts,
+  savedAt: new Date().toISOString()
+ };
+
+ var blob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
+ var url = URL.createObjectURL(blob);
+ var a = document.createElement("a");
+ a.href = url;
+ a.download = "cs_scripts_" + new Date().toISOString().slice(0,10) + ".json";
+ a.click();
+ URL.revokeObjectURL(url);
+
+ var btn = document.getElementById("saveBtn");
+ btn.textContent = "已保存";
+ btn.classList.add("saved");
+ setTimeout(function(){
+  btn.textContent = "保存脚本";
+  btn.classList.remove("saved");
+ }, 2000);
+
+ showToast("脚本已保存到本地");
+}
+
+// Initialize
+updatePwStatus();
+</script>
+
+</body>
+</html>
